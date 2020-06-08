@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Constants from 'expo-constants';
 import { Feather as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native'; 
+import { useNavigation, useRoute } from '@react-navigation/native'; 
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
@@ -22,6 +22,11 @@ interface Point {
   latitude: number;
   longitude: number;
 }
+
+interface RouteParams {
+  selectedUf: string,
+  selectedCity: string,
+}
  
 const Points: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -31,6 +36,9 @@ const Points: React.FC = () => {
   const [initialPosition, setInitialPosition] = useState<[number,number]>([0,0]);
 
   const navigation = useNavigation();
+  const routes = useRoute();
+
+  const routeParams = routes.params as RouteParams;
 
   useEffect(() => {
     async function loadPosition() {
@@ -63,14 +71,15 @@ const Points: React.FC = () => {
   useEffect(() => {
     api.get('points', {
       params: {
-        city: 'Rio de Janeiro',
-        uf: 'RJ',
-        items: [1,2,3]
+        city: routeParams.selectedCity,
+        uf: routeParams.selectedUf,
+        items: selectedItems
       }
     }).then(response => {
+      console.log(response.data);
       setPoints(response.data);
     })
-  }, [])
+  }, [selectedItems])
 
   function handleSelectedItem(id: number){
     const alreadySelected = selectedItems.find(item => item === id);
@@ -103,7 +112,7 @@ const Points: React.FC = () => {
         <Text style={styles.description}>Encontre no mapa um ponto de coleta.</Text>
 
         <View style={styles.mapContainer}>
-          {initialPosition[0] !== 0 && (
+          {(initialPosition[0] !== 0 && initialPosition[0] !== undefined ) && (
             <MapView 
               style={styles.map}
               initialRegion={{

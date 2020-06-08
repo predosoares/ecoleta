@@ -15,11 +15,13 @@ class PointsController {
       .where('city', String(city))
       .where('uf', String(uf))
       .distinct()
-      .select('points.*');
+      .select('points.*')
+      .orderBy('id');
 
-      const serializedPoints = points.map(point => {
+
+    const serializedPoints = points.map(point => {
         return {
-          ...points,
+          ...point,
           image_url: `http://192.168.0.7:3333/uploads/${point.image}` 
         }
       })
@@ -96,4 +98,4 @@ class PointsController {
   }
 }
 
-export default PointsController
+export default PointsController;
